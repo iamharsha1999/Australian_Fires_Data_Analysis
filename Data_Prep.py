@@ -2,22 +2,19 @@ import pandas as pd
 import os
 import numpy as np
 
-filenames = []
-csv_files = []
-for file in os.listdir('Dataset'):
-    filenames.append('Dataset/' + file)
-    csv_files.append(pd.read_csv('Dataset/' + file))
+files = ['CSV_2.csv','CSV_3.csv']
 
-j=1
-for i in csv_files:
-    if len(list(i))>14:
-        i = i.iloc[:,:-2]
-        print(len(list(i)))
-        i.to_csv('Dataset/CSV_' + str(j) + '.csv')
-    else:
-        i = i.iloc[:,:-1]
-        print(len(list(i)))
-        i.to_csv('Dataset/CSV_' + str(j) + '.csv')
-    print(list(i))
-    print("File Saved")
-    j+=1
+df = pd.read_csv('Dataset/CSV_2.csv')
+
+df['confidence'] = pd.to_numeric(df['confidence'])
+
+for index, row in df.iterrows():
+    if df.loc[index,'confidence'] <= 33.33:
+        df.loc[index,'confidence'] = 'l'
+    elif (df.loc[index,'confidence'] > 33.33) & (df.loc[index,'confidence'] <= 66.66):
+        df.loc[index,'confidence'] = 'n'
+    elif df.loc[index,'confidence'] > 66.66:
+        df.loc[index,'confidence'] = 'h'
+
+df.to_csv('Dataset/CSV_2_modified.csv')
+print('saved')
