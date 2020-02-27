@@ -16,5 +16,6 @@ for index, row in df.iterrows():
     elif df.loc[index,'confidence'] > 66.66:
         df.loc[index,'confidence'] = 'h'
 
+df.reset_index(drop = True)
 df.to_csv('Dataset/CSV_2_modified.csv')
 print('saved')
