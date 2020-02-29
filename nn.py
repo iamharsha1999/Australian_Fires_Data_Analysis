@@ -2,6 +2,7 @@ from keras.layers import Dense, Activation, BatchNormalization
 from keras.models import Sequential
 from keras.utils import to_categorical
 from keras.optimizers import SGD
+from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -36,49 +37,59 @@ le_i = LabelEncoder()
 le_c = LabelEncoder()
 le_acd = LabelEncoder()
 
-df = pd.read_csv('Dataset/CSV_3.csv')
+df = pd.read_csv('Dataset/Standard_CSV.csv')
 df['satellite'] = le_s.fit_transform(df['satellite'])
 df['instrument'] = le_i.fit_transform(df['instrument'])
 df['confidence'] = le_c.fit_transform(df['confidence'])
 df[['acq_date']] = df[['acq_date']].astype(str)
 df['acq_date'] = le_acd.fit_transform(df['acq_date'])
 df = df.iloc[:,1:]
-## Plot a correlation matrix
-corr = df.corr()
-mask = np.triu(np.ones_like(corr, dtype=np.bool))
-sns.heatmap(corr, mask=mask, vmax=.3, center=0,square=True, linewidths=0.5, cbar_kws={"shrink": .5})
-plt.show()
+
+# ## Plot a correlation matrix
+# corr = df.corr()
+# mask = np.triu(np.ones_like(corr, dtype=np.bool))
+# sns.heatmap(corr, mask=mask, vmax=.3, center=0,square=True, linewidths=0.5, cbar_kws={"shrink": .5})
+# plt.show()
 
 y = df.confidence.values
 x = df.drop('confidence', axis = 1).reset_index(drop = True)
 y = to_categorical(y)
 
-# x_train,x_val, y_train, y_val = train_test_split(x,y, test_size=0.3)
-#
-# ## Build and compile the model
-# model = build_model((x.shape[1],))
-# sgd = SGD(lr = 0.001, nesterov = True)
-# model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics = ['accuracy'])
-# model.summary()
+x_train,x_val, y_train, y_val = train_test_split(x,y, test_size=0.3)
 
-## Train the model
-# history = model.fit(x_train, y_train, epochs = 25, batch_size=32, validation_data = (x_train,y_train))
+## Build and compile the model
+model = build_model((x.shape[1],))
+sgd = SGD(lr = 0.0001, nesterov = True)
+model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics = ['accuracy'])
+model.summary()
 
-## Visualization
-# # Plot training & validation accuracy values
-# plt.plot(history.history['acc'])
-# plt.plot(history.history['val_acc'])
-# plt.title('Model accuracy')
-# plt.ylabel('Accuracy')
-# plt.xlabel('Epoch')
-# plt.legend(['Train', 'Test'], loc='upper left')
-# plt.show()
-#
-# # Plot training & validation loss values
-# plt.plot(history.history['loss'])
-# plt.plot(history.history['val_loss'])
-# plt.title('Model loss')
-# plt.ylabel('Loss')
-# plt.xlabel('Epoch')
-# plt.legend(['Train', 'Test'], loc='upper left')
-# plt.show()
+# Checkpoints and Learning Rate Reducer
+file_path = 'NN_weights/#101/weights-{epoch:02d}-{val_accuracy:.2f}.hdf5'
+checkpoints = ModelCheckpoint(file_path, verbose= 1, monitor= 'val_accuracy', save_best_only= True, mode = 'auto')
+
+reduce_lr = ReduceLROnPlateau(monitor='val_accuracy', factor=0.2, patience=7, min_lr=0.000001)
+callbacks = [checkpoints, reduce_lr]
+
+# Train the model
+history = model.fit(x_train, y_train, epochs = 100, batch_size=32, validation_data = (x_train,y_train), callbacks = callbacks)
+
+# Visualization
+# Plot training & validation accuracy values
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('Model accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.savefig('NN_weights/#101/Fig_1.png')
+
+plt.clf()
+
+# Plot training & validation loss values
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.savefig('NN_weights/#101/Fig_2.png')
