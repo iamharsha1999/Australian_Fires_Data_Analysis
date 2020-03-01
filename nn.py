@@ -3,6 +3,8 @@ from keras.models import Sequential
 from keras.utils import to_categorical
 from keras.optimizers import SGD
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
+import keras.backend as K
+from keras.utils import get_custom_objects
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -10,20 +12,32 @@ import seaborn as sns
 import numpy  as np
 import matplotlib.pyplot as plt
 
+class Swish(Activation):
+
+    def __init__(self, activation, **kwargs):
+        super(Swish, self).__init__(activation, **kwargs)
+        self.__name__ = 'swish'
+
+def swish(x):
+    return K.sigmoid(x) * x
+
+get_custom_objects().update({'swish': Swish(swish)})
+
+
 ## Define the model architecture
 def build_model(input_shape):
      model = Sequential()
 
      model.add(Dense(32, input_shape=input_shape))
-     model.add(Activation('relu'))
+     model.add(Activation('swish'))
      model.add(BatchNormalization())
 
      model.add(Dense(16))
-     model.add(Activation('relu'))
+     model.add(Activation('swish'))
      model.add(BatchNormalization())
 
      model.add(Dense(8))
-     model.add(Activation('relu'))
+     model.add(Activation('swish'))
      model.add(BatchNormalization())
 
      model.add(Dense(3))
@@ -64,7 +78,7 @@ model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics = ['ac
 model.summary()
 
 # Checkpoints and Learning Rate Reducer
-file_path = 'NN_weights/#101/weights-{epoch:02d}-{val_accuracy:.2f}.hdf5'
+file_path = 'NN_weights/#105/weights-{epoch:02d}-{val_accuracy:.2f}.hdf5'
 checkpoints = ModelCheckpoint(file_path, verbose= 1, monitor= 'val_accuracy', save_best_only= True, mode = 'auto')
 
 reduce_lr = ReduceLROnPlateau(monitor='val_accuracy', factor=0.2, patience=7, min_lr=0.000001)
@@ -81,7 +95,7 @@ plt.title('Model accuracy')
 plt.ylabel('Accuracy')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
-plt.savefig('NN_weights/#101/Fig_1.png')
+plt.savefig('NN_weights/#105/Fig_1.png')
 
 plt.clf()
 
@@ -92,4 +106,4 @@ plt.title('Model loss')
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
-plt.savefig('NN_weights/#101/Fig_2.png')
+plt.savefig('NN_weights/#105/Fig_2.png')
