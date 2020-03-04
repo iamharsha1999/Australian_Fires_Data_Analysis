@@ -73,12 +73,12 @@ x_train,x_val, y_train, y_val = train_test_split(x,y, test_size=0.3)
 
 ## Build and compile the model
 model = build_model((x.shape[1],))
-sgd = SGD(lr = 0.0001, nesterov = True)
-model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics = ['accuracy'])
+# sgd = SGD(lr = 0.0001, nesterov = True)
+model.compile(loss = 'categorical_crossentropy', optimizer = 'adagrad', metrics = ['accuracy'])
 model.summary()
 
 # Checkpoints and Learning Rate Reducer
-file_path = 'NN_weights/#105/weights-{epoch:02d}-{val_accuracy:.2f}.hdf5'
+file_path = 'NN_weights/#108/weights-{epoch:02d}-{val_accuracy:.2f}.hdf5'
 checkpoints = ModelCheckpoint(file_path, verbose= 1, monitor= 'val_accuracy', save_best_only= True, mode = 'auto')
 
 reduce_lr = ReduceLROnPlateau(monitor='val_accuracy', factor=0.2, patience=7, min_lr=0.000001)
@@ -95,7 +95,7 @@ plt.title('Model accuracy')
 plt.ylabel('Accuracy')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
-plt.savefig('NN_weights/#105/Fig_1.png')
+plt.savefig('NN_weights/#108/Fig_1.png')
 
 plt.clf()
 
@@ -106,4 +106,4 @@ plt.title('Model loss')
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
-plt.savefig('NN_weights/#105/Fig_2.png')
+plt.savefig('NN_weights/#108/Fig_2.png')
