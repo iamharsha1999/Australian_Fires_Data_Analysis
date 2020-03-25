@@ -37,7 +37,7 @@ x_train,x_val, y_train, y_val = train_test_split(x,y, test_size=0.3)
 # Train the KNN Algorithm
 gnb = GaussianNB().fit(x_train, y_train)
 predictions = gnb.predict(x_val)
-
+print(len(x_val))
 # Calculate Accuracy and other metrics
 print("Classification Metrics:")
 accuracyv = accuracy_score(predictions, y_val)
@@ -51,8 +51,10 @@ print('F1 score: %f' % f1)
 
 labels = ['h','l','n']
 cm = confusion_matrix(y_val, predictions)
+sum = cm.sum()
+cm = cm * 100 / (sum)
 df_cm = pd.DataFrame(cm, index = labels,columns = labels)
 fig = plt.figure()
 sns.heatmap(df_cm, annot=True)
 fig.tight_layout()
-plt.savefig('cm_knn.png')
+plt.savefig('nb.png')

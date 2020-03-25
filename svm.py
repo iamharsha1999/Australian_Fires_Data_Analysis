@@ -35,8 +35,8 @@ x_train,x_val, y_train, y_val = train_test_split(x,y, test_size=0.3)
 
 # Train the SVM
 print('SVM Training..')
-svm_model_linear = SVC(kernel = 'linear', C = 1, verbose = True).fit(x_train, y_train)
-svm_predictions = svm_model_linear.predict(x_val)
+svm_model_linear = SVC(kernel = 'linear', C = 1, verbose = True)
+# svm_predictions = svm_model_linear.predict(x_val)
 
 filename = 'SVM_model.sav'
 # print('Saving the model....')
@@ -62,6 +62,8 @@ print('F1 score: %f' % f1)
 # Plot Confusion Matrix
 labels = ['h','l','n']
 cm = confusion_matrix(y_val, svm_predictions)
+sum = cm.sum()
+cm = cm * 100 / (sum)
 df_cm = pd.DataFrame(cm, index = labels,columns = labels)
 fig = plt.figure()
 sns.heatmap(df_cm, annot=True)

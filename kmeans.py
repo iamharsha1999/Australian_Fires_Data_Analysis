@@ -48,6 +48,8 @@ print('F1 score: %f' % f1)
 # Plot Confusion Matrix
 labels = ['h','l','n']
 cm = confusion_matrix(y_val, predictions)
+sum = cm.sum()
+cm = cm * 100 / (sum)
 df_cm = pd.DataFrame(cm, index = labels,columns = labels)
 fig = plt.figure()
 sns.heatmap(df_cm, annot=True)
